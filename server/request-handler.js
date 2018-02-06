@@ -15,8 +15,11 @@ var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
+  'access-control-max-age': 10, // Seconds.
+  'Content-Type': 'application/json'
 };
+
+var store = [];
 
 let requestHandler = ((request, response) => {
   // Request and Response come from node's http module.
@@ -34,11 +37,11 @@ let requestHandler = ((request, response) => {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-   let body = [];
+  
   //const { headers, method, url } = request;
   var statusCode;
   var headers = defaultCorsHeaders;
-  headers['Content-Type'] = 'application/json';
+  // headers['Content-Type'] = 'application/json';
   //if (request.method === 'POST') {
   // console.log(request);
   //   let body = [];
@@ -70,36 +73,50 @@ let requestHandler = ((request, response) => {
   //   response.end();
   // });
   //} 
-  
+  let body = [];
   if (request.method === 'POST' && request.url === '/classes/messages') {
+    
     statusCode = 201;
-    response.writeHead(statusCode, headers);
-    // request.on('error', (err) => {
-    //   console.error(err);
-    // }).on('data', (chunk) => {
-    //   body.push(chunk);
-    // }).on('end', () => {
-    //   body = Buffer.concat(body).toString();
-    // });
-    response.end('H World!');
+    // response.writeHead(statusCode, headers);
+    request.on('error', (err) => {
+      console.error(err);
+    }).on('data', (chunk) => {
+      body.push(chunk);
+    }).on('end', () => {
+      body = Buffer.concat(body).toString();
+      console.log(body);
+      store.push(body);
+    });
+    console.log(store);
+    //console.log('this is the body ', body);
+    // console.log('this is the method ', request.method);
+    // console.log('this is the response ', response);
+    // console.log('this is the headers ', request.headers);
+    
   } else if (request.method === 'GET' && request.url === '/classes/messages') {
     statusCode = 200;
-    response.writeHead(statusCode, headers);
+    
     // request.on('error', (err) => {
     //   console.error(err);
     // }).on('data', (chunk) => {
     //   body.push(chunk);
     // }).on('end', () => {
     //   body = Buffer.concat(body).toString();
+    //   console.log(body);
+    
     // });
-    response.end();
+    // response.end();
   } else {
     statusCode = 404;
-    response.writeHead(statusCode, headers);
-    response.end('H World!');
+    
+    // response.end('H World!');
   }
   // The outgoing status.
   
+  response.writeHead(statusCode, headers);
+  
+  
+  response.end(JSON.stringify(store));
 
   // See the note below about CORS headers.
   

@@ -114,9 +114,11 @@ let requestHandler = ((request, response) => {
   // The outgoing status.
   
   response.writeHead(statusCode, headers);
+  var method = request.method;
+  var url = request.url;
+  var responseBody = {headers, method, url, store};
   
-  
-  response.end(JSON.stringify(store));
+  response.end(JSON.stringify(responseBody));
 
   // See the note below about CORS headers.
   

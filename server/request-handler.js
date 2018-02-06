@@ -11,6 +11,10 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+var fs = require('fs');
+var storage = {
+  results: []
+};
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -21,9 +25,7 @@ var defaultCorsHeaders = {
 
 
 const requestHandler = ((request, response) => {
-  var storage = {
-    results: []
-  };
+
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -43,17 +45,20 @@ const requestHandler = ((request, response) => {
   var statusCode;
   var headers = defaultCorsHeaders;
  
-  if (request.method === 'POST' && request.url === '/classes/messages') {
+  if (request.method === 'POST' && request.url === ('/classes/messages' || '/classes/room') ) {
     
     statusCode = 201;
 
-    let body = [];
+    var body = '';
     request.on('error', (err) => {
       console.error(err);
-    }).on('data', (chunk) => {
-      body.push(chunk);
-    }).on('end', () => {
-      body = Buffer.concat(body).toString();
+    });
+    request.on('data', function(chunk) {
+      
+      body += chunk;    
+    });
+    request.on('end', () => {
+      body = JSON.parse(body);
       storage.results.push(body);
     });
     response.writeHead(statusCode, headers);
@@ -66,7 +71,7 @@ const requestHandler = ((request, response) => {
     
   } else {
     statusCode = 404;
-    response.writeHead(statusCode, headers);
+    response.writeHead(statusCode);
     response.end();
   }
   // The outgoing status.

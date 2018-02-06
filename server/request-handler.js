@@ -18,8 +18,10 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10, // Seconds.
   'Content-Type': 'application/json'
 };
-
-var store = [];
+var storage = {
+  results: []
+};
+//var store = [];
 
 let requestHandler = ((request, response) => {
   // Request and Response come from node's http module.
@@ -84,16 +86,16 @@ let requestHandler = ((request, response) => {
       body.push(chunk);
     }).on('end', () => {
       body = Buffer.concat(body).toString();
-      console.log(body);
-      store.push(body);
+      //console.log(body);
+      storage.results.push(body);
     });
-    console.log(store);
+    //console.log(store);
     //console.log('this is the body ', body);
     // console.log('this is the method ', request.method);
     // console.log('this is the response ', response);
     // console.log('this is the headers ', request.headers);
     
-  } else if (request.method === 'GET' && request.url === '/classes/messages') {
+  } else if (request.method === 'GET' && request.url.startsWith('/classes/messages')) {
     statusCode = 200;
     
     // request.on('error', (err) => {
@@ -114,11 +116,11 @@ let requestHandler = ((request, response) => {
   // The outgoing status.
   
   response.writeHead(statusCode, headers);
-  var method = request.method;
-  var url = request.url;
-  var responseBody = {headers, method, url, store};
-  
-  response.end(JSON.stringify(responseBody));
+  //var method = request.method;
+  //var url = request.url;
+  //var responseBody = {headers, method, url, store}; 
+  response.write(JSON.stringify(storage));
+  response.end();
 
   // See the note below about CORS headers.
   

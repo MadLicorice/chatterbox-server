@@ -18,12 +18,12 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10, // Seconds.
   'Content-Type': 'application/json'
 };
-var storage = {
-  results: []
-};
-//var store = [];
 
-let requestHandler = ((request, response) => {
+
+const requestHandler = ((request, response) => {
+  var storage = {
+    results: []
+  };
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -40,87 +40,40 @@ let requestHandler = ((request, response) => {
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
   
-  //const { headers, method, url } = request;
   var statusCode;
   var headers = defaultCorsHeaders;
-  // headers['Content-Type'] = 'application/json';
-  //if (request.method === 'POST') {
-  // console.log(request);
-  //   let body = [];
-  //   request.on('error', (err) => {
-  //     console.error(err);
-  //   }).on('data', (chunk) => {
-  //     body.push(chunk);
-  //   }).on('end', () => {
-  //     body = Buffer.concat(body).toString();
-  //   });
-    
-  // request.on('data', (chunk) => {
-  //   body.push(chunk);
-  // }).on('end', () => {
-  //   body = Buffer.concat(body).toString();
-  //   response.on('error', (err) => {
-  //     console.log(err);
-  //   });
-  //   response.statusCode = 200;
-  //   response.setHeader('Content-Type', 'application/json');
-    
-  //   let responseBody = {
-  //     headers,
-  //     method,
-  //     url,
-  //     body
-  //   };
-  //   reponse.write(JSON.stringify(responseBody));
-  //   response.end();
-  // });
-  //} 
-  let body = [];
+ 
   if (request.method === 'POST' && request.url === '/classes/messages') {
     
     statusCode = 201;
-    // response.writeHead(statusCode, headers);
+
+    let body = [];
     request.on('error', (err) => {
       console.error(err);
     }).on('data', (chunk) => {
       body.push(chunk);
     }).on('end', () => {
       body = Buffer.concat(body).toString();
-      //console.log(body);
       storage.results.push(body);
     });
-    //console.log(store);
-    //console.log('this is the body ', body);
-    // console.log('this is the method ', request.method);
-    // console.log('this is the response ', response);
-    // console.log('this is the headers ', request.headers);
+    response.writeHead(statusCode, headers);
+    response.end();
     
-  } else if (request.method === 'GET' && request.url.startsWith('/classes/messages')) {
+  } else if (request.method === 'GET' && request.url === '/classes/messages') {
     statusCode = 200;
+    response.writeHead(statusCode, headers);
+    response.end(JSON.stringify(storage));
     
-    // request.on('error', (err) => {
-    //   console.error(err);
-    // }).on('data', (chunk) => {
-    //   body.push(chunk);
-    // }).on('end', () => {
-    //   body = Buffer.concat(body).toString();
-    //   console.log(body);
-    
-    // });
-    // response.end();
   } else {
     statusCode = 404;
-    
-    // response.end('H World!');
+    response.writeHead(statusCode, headers);
+    response.end();
   }
   // The outgoing status.
+ 
   
-  response.writeHead(statusCode, headers);
-  //var method = request.method;
-  //var url = request.url;
-  //var responseBody = {headers, method, url, store}; 
-  response.write(JSON.stringify(storage));
-  response.end();
+  
+ 
 
   // See the note below about CORS headers.
   
